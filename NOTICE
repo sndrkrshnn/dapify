@@ -1,0 +1,14 @@
+# DAPify
+
+This product includes software developed by Aditya R (ClassiPod).
+This product includes software developed by Aditya R.
+
+- The player in `apps/classipod/` is a fork of ClassiPod 2.1.0, which is
+  released under the BSD-4-Clause license. See
+  `apps/classipod/LICENSE` and `apps/classipod/UPSTREAM-README.md`.
+- The UI font is DAP Sans, the unmodified TeX Gyre Heros font, released under
+  the GUST Font License. See `apps/classipod/assets/fonts/GUST-FONT-LICENSE.txt`
+  and `apps/dapsettings/assets/fonts/GUST-FONT-LICENSE.txt`.
+
+The proprietary Linotype Helvetica files used in the private kenzo build are
+not part of this repository and must not be added here.

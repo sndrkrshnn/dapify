@@ -1,0 +1,35 @@
+# build output
+build/
+.gradle/
+.kotlin/
+.dart_tool/
+*.apk
+*.keystore
+
+# app signing / local config (never commit real values)
+apps/classipod/android/key.properties
+apps/classipod/android/local.properties
+apps/classipod/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+apps/classipod/lib/l10n/generated/
+apps/classipod/untranslated_messages.json
+apps/classipod/ios/Flutter/ephemeral/
+apps/classipod/ios/Flutter/Generated.xcconfig
+apps/classipod/ios/Flutter/flutter_export_environment.sh
+apps/classipod/ios/Runner/GeneratedPluginRegistrant.h
+apps/classipod/ios/Runner/GeneratedPluginRegistrant.m
+
+# installer state and downloaded APKs (regenerable, device-specific)
+dist/*
+!dist/.gitkeep
+
+# proprietary fonts — DAPify uses DAP Sans (TeX Gyre Heros) instead
+apps/classipod/assets/fonts/Helvetica.ttf
+apps/classipod/assets/fonts/Helvetica-Bold.ttf
+apps/dapsettings/assets/fonts/Helvetica.ttf
+apps/dapsettings/assets/fonts/Helvetica-Bold.ttf
+
+# test fixtures (copyrighted audio) — see apps/classipod/test/README.md
+apps/classipod/test/test_files/
+
+# OS noise
+.DS_Store

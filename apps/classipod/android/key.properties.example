@@ -1,0 +1,5 @@
+storePassword=<password>
+keyPassword=<password>
+keyAlias=<alias>
+# Relative paths are resolved against the android/ directory.
+storeFile=../keystore/release.keystore

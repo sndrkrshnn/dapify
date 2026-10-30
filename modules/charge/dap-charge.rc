@@ -1,0 +1,21 @@
+# DAPify charge bypass: keep the phone running from external power when the
+# battery is full, and resume charging at the configured standby threshold.
+#
+# init supervises the daemon directly, so it is restarted if it dies. The
+# service must run in a domain that can execve /system/bin/sh and write the
+# battery sysfs node. On kenzo that is qti_init_shell, the domain init already
+# uses for rc `exec` commands. __DAP_INIT_DOMAIN__ is replaced by the installer;
+# if the profile's domain is empty the seclabel line is removed.
+
+service dap-charge /system/bin/sh /system/etc/dapify/dap-charge.sh
+    class main
+    user root
+    group root
+    seclabel u:r:__DAP_INIT_DOMAIN__:s0
+    disabled
+
+on property:sys.boot_completed=1
+    start dap-charge
+
+on property:dap.charge.apply=1
+    restart dap-charge

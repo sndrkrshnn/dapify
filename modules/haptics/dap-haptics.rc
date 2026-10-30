@@ -1,0 +1,10 @@
+# DAPify haptics: apply the click-wheel drive voltage once the system is up.
+# 2800 mV is the verified kenzo value; the app's 14 ms detent is what makes it
+# a soft thud. Keep this in /system/etc/init, not /system/etc/init.d: sysinit
+# cannot write the vibrator node on the verified ROM.
+
+on property:sys.boot_completed=1
+    exec - root root -- /system/bin/sh /system/etc/dapify/dap-haptics.sh
+
+on property:dap.haptics.apply=1
+    exec - root root -- /system/bin/sh /system/etc/dapify/dap-haptics.sh
