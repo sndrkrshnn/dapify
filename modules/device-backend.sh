@@ -128,6 +128,18 @@ case "${1:-}" in
             log "WARN no keylayout payload for ${DAP_KEYLAYOUT_TARGET:-<unset>}"
         fi
 
+        # Audio policy: install the hi-res / native-rate configuration if the
+        # profile ships one. Backed up like every other replaced file, so
+        # `uninstall` restores the stock policy.
+        if [ -n "${DAP_AUDIO_SOURCE:-}" ] &&
+            [ -f "$BASE/audio_policy_configuration.xml" ]; then
+            DAP_AUDIO_TARGET=${DAP_AUDIO_TARGET:-/system/etc/audio_policy_configuration.xml}
+            install_file "$BASE/audio_policy_configuration.xml" \
+                "$DAP_AUDIO_TARGET" 644
+        elif [ -n "${DAP_AUDIO_SOURCE:-}" ]; then
+            log "WARN audio profile '$DAP_AUDIO_SOURCE' has no payload; skipping"
+        fi
+
         printf '%s\n' "$VERSION" > "$SYSTEM_DIR/version" ||
             die "cannot write version"
         chmod 644 "$SYSTEM_DIR/version"

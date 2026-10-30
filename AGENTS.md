@@ -15,7 +15,13 @@ Guidance for AI coding agents working in this repository.
 - **Do not change the verified kenzo behavior** unless the user asks. The
   verified values live in `devices/kenzo/device.conf` and
   `docs/compatibility.md` (haptics 2800 mV, charge node
-  `battery_charging_enabled`, init domain `qti_init_shell`, etc.).
+  `battery_charging_enabled`, init domain `qti_init_shell`, and the hi-res audio
+  policy `devices/kenzo/audio/audio_policy_configuration.xml`, md5
+  `00ec45d123d0ca5633a146270b608220`, which matches the live device).
+- **Audio patcher** `modules/audio/patch_audio_policy.py` must stay idempotent
+  and must reproduce the verified kenzo file byte-for-byte (test:
+  `python3 modules/audio/patch_audio_policy.py <stock> <out>` then compare). Do
+  not commit a patched audio XML that you cannot regenerate from a stock file.
 - **Prefer the dedicated tools** over shell one-liners, and keep shell scripts
   POSIX `sh` compatible (no bashisms; `sh -n` must pass).
 
@@ -24,9 +30,12 @@ Guidance for AI coding agents working in this repository.
 - `install.sh` + `lib/` — the host-side installer (POSIX sh). Commands:
   `install`, `uninstall`, `doctor`, `list`, `help`.
 - `modules/` — device-side payloads: `device-backend.sh` (system backend),
-  `haptics/`, `charge/`, `magisk/` (Magisk module).
+  `haptics/`, `charge/`, `audio/` (hi-res audio-policy patcher), `magisk/`
+  (Magisk module).
 - `devices/<codename>/device.conf` — per-device profile, sourced by POSIX sh on
-  both host and device. `devices/_template/` is the starting point for ports.
+  both host and device. `devices/<codename>/audio/` holds a pre-patched
+  `audio_policy_configuration.xml` when the profile enables hi-res.
+  `devices/_template/` is the starting point for ports.
 - `apps/classipod/` — ClassiPod fork (player). `apps/dapsettings/` — companion
   settings app.
 - `docs/` — porting, architecture, recovery, troubleshooting, building,

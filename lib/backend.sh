@@ -23,6 +23,11 @@ prepare_staging() {
         adb_do push "$DAP_PROFILE_DIR/$DAP_KEYLAYOUT_SOURCE" \
             "/data/local/tmp/dapify/keylayout/$DAP_KEYLAYOUT_TARGET" >/dev/null
     fi
+    if [ -n "${DAP_AUDIO_SOURCE:-}" ] &&
+        [ -f "$DAP_PROFILE_DIR/$DAP_AUDIO_SOURCE" ]; then
+        adb_do push "$DAP_PROFILE_DIR/$DAP_AUDIO_SOURCE" \
+            /data/local/tmp/dapify/audio_policy_configuration.xml >/dev/null
+    fi
 }
 
 module_enabled() {
@@ -80,8 +85,16 @@ build_magisk_module() {
 
     if [ -n "${DAP_KEYLAYOUT_SOURCE:-}" ] &&
         [ -f "$DAP_PROFILE_DIR/$DAP_KEYLAYOUT_SOURCE" ]; then
+        mkdir -p "$out/system/usr/keylayout"
         cp "$DAP_PROFILE_DIR/$DAP_KEYLAYOUT_SOURCE" \
             "$out/system/usr/keylayout/$DAP_KEYLAYOUT_TARGET"
+    fi
+
+    if [ -n "${DAP_AUDIO_SOURCE:-}" ] &&
+        [ -f "$DAP_PROFILE_DIR/$DAP_AUDIO_SOURCE" ]; then
+        audio_target=${DAP_AUDIO_TARGET:-/system/etc/audio_policy_configuration.xml}
+        mkdir -p "$out$(dirname "$audio_target")"
+        cp "$DAP_PROFILE_DIR/$DAP_AUDIO_SOURCE" "$out$audio_target"
     fi
 
     chmod 755 "$out/service.sh" "$out/uninstall.sh" \
@@ -90,6 +103,8 @@ build_magisk_module() {
     chmod 644 "$out/module.prop" "$out/system/etc/dapify/device.conf"
     [ -n "${DAP_KEYLAYOUT_TARGET:-}" ] &&
         chmod 644 "$out/system/usr/keylayout/$DAP_KEYLAYOUT_TARGET" 2>/dev/null
+    [ -n "${DAP_AUDIO_SOURCE:-}" ] &&
+        chmod 644 "$out${DAP_AUDIO_TARGET:-/system/etc/audio_policy_configuration.xml}" 2>/dev/null
 }
 
 install_magisk_backend() {

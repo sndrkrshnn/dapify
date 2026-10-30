@@ -3,6 +3,7 @@
 | Device | Codename | ROM | Root | Backend | Status |
 | --- | --- | --- | --- | --- | --- |
 | Xiaomi Redmi Note 3 | `kenzo` | LineageOS 14.1 (A 7.1.2), Radon V6.3 | CM root | system (`/system`) | **verified** |
+| Xiaomi POCO F1 | `beryllium` | LineageOS 16.0+ (A 9/10+) | Magisk | magisk | **unverified** (best-effort) |
 
 ## Verified values (kenzo)
 
@@ -17,6 +18,41 @@
 | Charge thresholds | suspend 100 %, resume 90 % (or on unplug), 15 s poll |
 | Init domain | `u:r:qti_init_shell:s0` |
 | ADB serial | `45abfcf1` |
+
+## Audio policy (both devices)
+
+The audio module patches `audio_policy_configuration.xml` to advertise 44.1 kHz
+on the primary/raw/deep-buffer paths and the full 16/24-bit hi-res set
+(44.1/48/88.2/96/176.4/192 kHz) on the wired device ports. The same
+`modules/audio/patch_audio_policy.py` is used for every device; the profile
+points at the generated file.
+
+| Device | Stock path | Patched file | Status |
+| --- | --- | --- | --- |
+| `kenzo` | `/system/etc/audio_policy_configuration.xml` | `devices/kenzo/audio/audio_policy_configuration.xml` (md5 `00ec45d1…`) | **verified** (matches the live device) |
+| `beryllium` | `/vendor/etc/audio_policy_configuration.xml` | `devices/beryllium/audio/audio_policy_configuration.xml` (generated from the sdm845-common stock) | **patch verified clean; on-device listen-test pending** |
+
+Note: ClassiPod/just_audio plays 24-bit FLAC through the 16-bit/48 kHz primary
+path on both devices. The 24-bit/192 kHz `direct_pcm` path the patch configures
+is what a direct-output player (Poweramp/Neutron/UAPP) uses for bit-perfect
+wired playback.
+
+## beryllium (Xiaomi POCO F1) — unverified
+
+Written from the LineageOS `beryllium` + `sdm845-common` trees (lineage-16.0).
+Confirmed from the tree: arm64 (SDM845), single physical HOME button
+(`keylayout/gpio-keys.kl`, key 102) + rear Goodix fingerprint (no capacitive nav
+to remap), standard `com.android.systemui`, read-only `/system` → **Magisk
+required**. The audio patch is generated from the real stock `/vendor/etc` file
+and patches cleanly.
+
+**Verify on a real device before relying on it** (full list in
+`devices/beryllium/README.md`):
+
+- vibrator node + type: `ls /sys/class/timed_output/vibrator/`
+- battery charge-suspend node: `ls /sys/class/power_supply/battery/`
+- audio policy path (`/vendor/etc` vs `/system/etc`): `ls -l
+  /vendor/etc/audio_policy_configuration.xml /system/etc/audio_policy_configuration.xml`
 
 ## Known limitations (kenzo)
 

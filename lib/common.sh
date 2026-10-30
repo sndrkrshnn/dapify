@@ -44,6 +44,23 @@ is_uint() {
     esac
 }
 
+md5_of() {
+    # md5 of a file; works with `md5` (macOS/BSD) and `md5sum` (GNU).
+    if command -v md5 >/dev/null 2>&1; then
+        md5 -q "$1" 2>/dev/null
+    else
+        md5sum "$1" 2>/dev/null | awk '{print $1}'
+    fi
+}
+
+md5_of_stdin() {
+    if command -v md5 >/dev/null 2>&1; then
+        md5 -q 2>/dev/null
+    else
+        md5sum 2>/dev/null | awk '{print $1}'
+    fi
+}
+
 adb_do() {
     if [ -n "${ADB_SERIAL:-}" ]; then
         "$ADB" -s "$ADB_SERIAL" "$@"
@@ -129,7 +146,9 @@ detect_backend() {
             return 0
             ;;
     esac
-    if adb_shell "test -d /data/adb/magisk -o -x /data/adb/magisk/magisk" 2>/dev/null; then
+    # Probe as root: /data/adb is often not visible to a non-root adb shell, so
+    # a plain `test -d` would wrongly report "system". Use the detected su.
+    if adb_root "test -d /data/adb/magisk && echo magisk" 2>/dev/null | grep -q magisk; then
         printf 'magisk\n'
     else
         printf 'system\n'
@@ -171,6 +190,8 @@ load_device() {
     DAP_VIBRATOR_DIR=${DAP_VIBRATOR_DIR:-/sys/devices/virtual/timed_output/vibrator}
     DAP_KEYLAYOUT_TARGET=${DAP_KEYLAYOUT_TARGET:-}
     DAP_KEYLAYOUT_SOURCE=${DAP_KEYLAYOUT_SOURCE:-}
+    DAP_AUDIO_SOURCE=${DAP_AUDIO_SOURCE:-}
+    DAP_AUDIO_TARGET=${DAP_AUDIO_TARGET:-/system/etc/audio_policy_configuration.xml}
     DAP_ROOT_BACKEND=${DAP_ROOT_BACKEND:-auto}
 }
 

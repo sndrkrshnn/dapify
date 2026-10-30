@@ -124,6 +124,23 @@ do_doctor() {
         check warn "keylayout" "profile has no keylayout target"
     fi
 
+    # audio policy
+    if [ -n "${DAP_AUDIO_SOURCE:-}" ] &&
+        [ -f "$DAP_PROFILE_DIR/$DAP_AUDIO_SOURCE" ]; then
+        ap_target=${DAP_AUDIO_TARGET:-/system/etc/audio_policy_configuration.xml}
+        want_md5=$(md5_of "$DAP_PROFILE_DIR/$DAP_AUDIO_SOURCE")
+        got_md5=$(adb_root_cat "$ap_target" | md5_of_stdin)
+        if [ -z "$got_md5" ]; then
+            check fail "audio policy" "$ap_target unreadable"
+        elif [ "$want_md5" = "$got_md5" ]; then
+            check pass "audio policy" "$ap_target matches profile (hi-res enabled)"
+        else
+            check warn "audio policy" "$ap_target differs from profile (stock, or a different patch)"
+        fi
+    else
+        check warn "audio policy" "profile has no audio policy payload"
+    fi
+
     # doze whitelist
     if adb_shell "dumpsys deviceidle whitelist" 2>/dev/null |
         grep -q "$DAP_PLAYER_PACKAGE"; then

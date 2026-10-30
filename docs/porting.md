@@ -109,6 +109,44 @@ need:
 adb shell su -c 'dmesg | grep -i avc | grep dap-charge'
 ```
 
+### Audio policy (optional, for 44.1 kHz + hi-res)
+
+Stock QCOM audio policy files often advertise only 16-bit/48 kHz on the wired
+output device ports, so 44.1 kHz FLAC is resampled and 24-bit/192 kHz is
+downsampled. The codec usually supports the full range; advertising it lets a
+player use the native rate.
+
+1. Find the stock file. It is at `/system/etc/audio_policy_configuration.xml` on
+   older builds and at `/vendor/etc/audio_policy_configuration.xml` on
+   system-as-root / sdm845 builds (the boot property `ro.audio_policy.file`
+   names the active one):
+
+   ```sh
+   adb shell getprop ro.audio_policy.file
+   adb shell ls -l /system/etc/audio_policy_configuration.xml /vendor/etc/audio_policy_configuration.xml 2>&1
+   ```
+
+2. Pull it, patch it, and drop it in the profile:
+
+   ```sh
+   adb pull /system/etc/audio_policy_configuration.xml /tmp/apc.xml
+   python3 modules/audio/patch_audio_policy.py \
+       /tmp/apc.xml devices/<codename>/audio/audio_policy_configuration.xml
+   ```
+
+   The patcher is idempotent and fails loudly if a block it needs is missing, so
+   if it errors your stock file differs from the expected QCOM layout — inspect
+   the file by hand rather than forcing it.
+
+3. In `device.conf` set `DAP_AUDIO_SOURCE="audio/audio_policy_configuration.xml"`
+   and `DAP_AUDIO_TARGET` to the real path. The installer backs up the stock
+   file and restores it on `uninstall`; `doctor` reports whether the installed
+   file matches the profile.
+
+Note: ClassiPod/just_audio plays through the 16-bit/48 kHz primary path; the
+24-bit/192 kHz `direct_pcm` path the patch enables is for direct-output players
+(Poweramp/Neutron/UAPP).
+
 ## 3. Verify
 
 ```sh
@@ -119,8 +157,9 @@ adb reboot
 ```
 
 `doctor` checks root, the app packages, home activity, SystemUI, keyguard,
-haptics voltage, charge daemon/node, keylayout, and doze whitelist. Read the
-output and fix any FAILs before calling the device supported.
+haptics voltage, charge daemon/node, keylayout, audio policy, and doze
+whitelist. Read the output and fix any FAILs before calling the device
+supported.
 
 Manual checks:
 

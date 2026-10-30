@@ -3,6 +3,8 @@ build/
 .gradle/
 .kotlin/
 .dart_tool/
+__pycache__/
+*.pyc
 *.apk
 *.keystore
 
