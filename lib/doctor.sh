@@ -76,18 +76,18 @@ do_doctor() {
         check fail "keyguard disabled" "lockscreen.disabled is not 1"
     fi
 
-    # haptics
-    vtg=$(adb_shell "cat $DAP_VIBRATOR_DIR/vtg_level" 2>/dev/null | tr -d '\r')
+    # haptics (node needs root)
+    vtg=$(adb_root_cat "$DAP_VIBRATOR_DIR/vtg_level")
     want_vtg=$(adb_shell "getprop persist.dap.haptics.vtg" 2>/dev/null | tr -d '\r')
     [ -n "$want_vtg" ] || want_vtg=$DAP_HAPTICS_MV
     if [ -n "$vtg" ]; then
         if [ "$vtg" = "$want_vtg" ]; then
             check pass "haptics voltage" "$vtg mV (persist=$want_vtg)"
         else
-            check warn "haptics voltage" "$vtg mV on device, persist requests $want_vtg"
+            check warn "haptics voltage" "$vtg mV on device, persist requests $want_vtg (a live override is fine)"
         fi
     else
-        check fail "haptics voltage" "$DAP_VIBRATOR_DIR/vtg_level unreadable"
+        check fail "haptics voltage" "$DAP_VIBRATOR_DIR/vtg_level unreadable as root"
     fi
 
     # charge
@@ -102,11 +102,11 @@ do_doctor() {
             check fail "charge daemon" "init.svc.dap-charge=$charge_svc and no dap-charge process"
         fi
     fi
-    charge_node=$(adb_shell "cat $DAP_CHARGE_NODE" 2>/dev/null | tr -d '\r')
+    charge_node=$(adb_root_cat "$DAP_CHARGE_NODE")
     if [ -n "$charge_node" ]; then
-        check pass "charge node" "$DAP_CHARGE_NODE = $charge_node"
+        check pass "charge node" "$DAP_CHARGE_NODE = $charge_node (1=charging, 0=suspended)"
     else
-        check fail "charge node" "$DAP_CHARGE_NODE unreadable"
+        check fail "charge node" "$DAP_CHARGE_NODE unreadable as root"
     fi
 
     # keylayout

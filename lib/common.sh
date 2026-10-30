@@ -73,6 +73,13 @@ adb_root_script() {
     adb_do shell "${SU_CMD:-su} -c 'sh /data/local/tmp/dapify/root.sh'"
 }
 
+adb_root_cat() {
+    # Read a single file as root. `su -c` alone mangles paths (it can treat a
+    # leading slash as an option and the path as an `id` argument), so wrap
+    # the read in `sh -c`.
+    adb_do shell "${SU_CMD:-su} -c 'sh -c \"cat $1\"'" 2>/dev/null | tr -d '\r'
+}
+
 require_adb() {
     have "$ADB" || die "adb not found; install Android platform-tools"
     adb_do get-state >/dev/null 2>&1 ||
